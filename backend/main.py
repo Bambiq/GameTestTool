@@ -1,44 +1,52 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from pydantic import BaseModel
-from typing import List
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
+
+from models import Log
+from database import SessionLocal, engine
+from database import init_db
 
 app = FastAPI()
 
-# Ustawienia CORS - tu wpisz adres(y) frontendów, które będą się łączyć
-origins = [
-    "https://laughing-space-winner-x5r6wqqx5rwjfrxw-3000.app.github.dev",  # przykład GitHub Codespaces frontend
-    "http://localhost:3000",  # lokalny frontend (jeśli używasz)
-]
-
+# CORS (dla komunikacji z frontendem)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # lub ["*"] dla testów (uwaga: ryzykowne w produkcji)
+    allow_origins=["*"],  # Możesz podać konkretny frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Model danych logu
-class LogEntry(BaseModel):
+# Schemat danych wejściowych
+class LogCreate(BaseModel):
     test_name: str
     result: str
     time: datetime
 
-# Przechowywanie logów w pamięci (na czas działania aplikacji)
-logs: List[LogEntry] = []
+# Dependency: sesja DB
+async def get_db():
+    async with SessionLocal() as session:
+        yield session
 
+@app.on_event("startup")
+async def on_startup():
+    await init_db()
+
+# Endpoint: dodawanie loga
 @app.post("/logs")
-async def post_log(log: LogEntry):
-    logs.append(log)
-    return {"message": "Log zapisany"}
+async def create_log(log: LogCreate, db: AsyncSession = Depends(get_db)):
+    db_log = Log(**log.dict())
+    db.add(db_log)
+    await db.commit()
+    await db.refresh(db_log)
+    return {"message": "Log added", "log": log}
 
-@app.get("/logs", response_model=List[LogEntry])
-async def get_logs():
+# Endpoint: pobieranie wszystkich logów
+@app.get("/logs")
+async def read_logs(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Log))
+    logs = result.scalars().all()
     return logs
-
-# Opcjonalnie endpoint testowy
-@app.get("/")
-async def root():
-    return {"message": "Backend działa"}
