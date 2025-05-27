@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { postLog } from "../api";
+import { postLog } from "./api";
 
 export default function LogForm({ onLogSent }) {
   const [testName, setTestName] = useState("");
@@ -18,10 +18,11 @@ export default function LogForm({ onLogSent }) {
         result,
         time: new Date().toISOString(),
       };
+
       await postLog(log);
-      onLogSent(log);
       setTestName("");
       setResult("pass");
+      onLogSent();
     } catch (err) {
       setError(err.message);
     } finally {
