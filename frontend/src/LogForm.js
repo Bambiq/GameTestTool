@@ -1,19 +1,23 @@
 import React, { useState } from "react";
-import { postLog } from "./api";
+import { postLog } from "../api";
 
-function LogForm({ onLogSent }) {
+export default function LogForm({ onLogSent }) {
   const [testName, setTestName] = useState("");
   const [result, setResult] = useState("pass");
   const [error, setError] = useState(null);
   const [sending, setSending] = useState(false);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSending(true);
 
     try {
-      const log = { test_name: testName, result, time: new Date().toISOString() };
+      const log = {
+        test_name: testName,
+        result,
+        time: new Date().toISOString(),
+      };
       await postLog(log);
       onLogSent(log);
       setTestName("");
@@ -33,14 +37,18 @@ function LogForm({ onLogSent }) {
         <input
           type="text"
           value={testName}
-          onChange={e => setTestName(e.target.value)}
+          onChange={(e) => setTestName(e.target.value)}
           required
           className="ml-2 border px-2 py-1"
         />
       </label>
       <label className="block mb-2">
         Wynik:
-        <select value={result} onChange={e => setResult(e.target.value)} className="ml-2 border px-2 py-1">
+        <select
+          value={result}
+          onChange={(e) => setResult(e.target.value)}
+          className="ml-2 border px-2 py-1"
+        >
           <option value="pass">Pass</option>
           <option value="fail">Fail</option>
         </select>

@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from pydantic import BaseModel
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Path
 
 from models import Log
 from database import SessionLocal, engine
@@ -42,7 +43,12 @@ async def create_log(log: LogCreate, db: AsyncSession = Depends(get_db)):
     db.add(db_log)
     await db.commit()
     await db.refresh(db_log)
-    return {"message": "Log added", "log": log}
+    return {"message": "Log added", "log": {
+        "id": db_log.id,
+        "test_name": db_log.test_name,
+        "result": db_log.result,
+        "time": db_log.time,
+    }}
 
 # Endpoint: pobieranie wszystkich logów
 @app.get("/logs")
@@ -50,3 +56,14 @@ async def read_logs(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Log))
     logs = result.scalars().all()
     return logs
+
+@app.delete("/logs/{log_id}")
+async def delete_log(log_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Log).where(Log.id == log_id))
+    log = result.scalar_one_or_none()
+    if not log:
+        raise HTTPException(status_code=404, detail="Log not found")
+
+    await db.delete(log)
+    await db.commit()
+    return {"message": "Log deleted"}
