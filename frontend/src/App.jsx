@@ -2,14 +2,15 @@ import React, { useEffect, useState } from "react";
 import { fetchLogs, deleteLog } from "./api";
 import LogForm from "./LogForm";
 import LogList from "./LogList";
-import LogControls from "./LogControls"; // <-- NOWY import
+import LogControls from "./LogControls";
+import StatsPanel from "./StatsPanel";
 
 export default function App() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState("all"); // <-- filter
-  const [sort, setSort] = useState("newest");  // <-- sort
+  const [filter, setFilter] = useState("all");
+  const [sort, setSort] = useState("newest");
 
   const loadLogs = () => {
     fetchLogs()
@@ -56,9 +57,16 @@ export default function App() {
   if (error) return <div>Błąd: {error}</div>;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Historia testów</h1>
-      <LogForm onLogSent={handleLogSent} />
+      <div className="flex flex-col md:flex-row gap-4 mb-4 items-start">
+        <div className="md:w-1/2">
+          <LogForm onLogSent={handleLogSent} />
+        </div>
+        <div className="md:w-1/2">
+          <StatsPanel logs={logs} />
+        </div>
+      </div>
       <LogControls
         filter={filter}
         sort={sort}

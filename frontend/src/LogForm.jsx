@@ -31,7 +31,7 @@ export default function LogForm({ onLogSent }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 p-4 border rounded">
+    <form onSubmit={handleSubmit} className="p-4 border rounded bg-gray-50">
       <h2 className="text-xl font-semibold mb-2">Wyślij nowy log testu</h2>
       <label className="block mb-2">
         Nazwa testu:
