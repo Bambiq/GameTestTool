@@ -16,6 +16,7 @@
 │       ├── LogForm.jsx
 │       ├── LogList.jsx
 │       ├── LogControls.jsx
+│       ├── StatsPanel.jsx
 │       └── api.js    
 │
 ├── .gitignore

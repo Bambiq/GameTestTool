@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Path
-
+from typing import List
 from models import Log
 from database import SessionLocal, engine
 from database import init_db
@@ -32,6 +32,15 @@ async def get_db():
     async with SessionLocal() as session:
         yield session
 
+class LogRead(BaseModel):
+    id: int
+    test_name: str
+    result: str
+    time: datetime
+
+    class Config:
+        orm_mode = True
+
 @app.on_event("startup")
 async def on_startup():
     await init_db()
@@ -51,7 +60,7 @@ async def create_log(log: LogCreate, db: AsyncSession = Depends(get_db)):
     }}
 
 # Endpoint: pobieranie wszystkich logów
-@app.get("/logs")
+@app.get("/logs", response_model=List[LogRead])
 async def read_logs(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Log))
     logs = result.scalars().all()

@@ -3,65 +3,73 @@ import { postLog } from "./api";
 
 export default function LogForm({ onLogSent }) {
   const [testName, setTestName] = useState("");
-  const [result, setResult] = useState("pass");
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [sending, setSending] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!testName.trim() || !result) {
+      setError("Proszę wypełnić wszystkie pola.");
+      return;
+    }
+
+    setLoading(true);
     setError(null);
-    setSending(true);
 
     try {
-      const log = {
-        test_name: testName,
-        result,
-        time: new Date().toISOString(),
-      };
-
-      await postLog(log);
+      await postLog({ test_name: testName.trim(), result, time: new Date().toISOString() });
       setTestName("");
-      setResult("pass");
+      setResult("");
       onLogSent();
     } catch (err) {
-      setError(err.message);
+      setError("Błąd podczas dodawania logu: " + err.message);
     } finally {
-      setSending(false);
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border rounded bg-gray-50">
-      <h2 className="text-xl font-semibold mb-2">Wyślij nowy log testu</h2>
+    <form onSubmit={handleSubmit} className="border p-4 rounded bg-white shadow">
+      <h2 className="text-lg font-semibold mb-4">Dodaj nowy log testu</h2>
+
       <label className="block mb-2">
         Nazwa testu:
         <input
           type="text"
           value={testName}
           onChange={(e) => setTestName(e.target.value)}
+          className="mt-1 block w-full border rounded px-2 py-1"
+          disabled={loading}
           required
-          className="ml-2 border px-2 py-1"
         />
       </label>
-      <label className="block mb-2">
+
+      <label className="block mb-4">
         Wynik:
         <select
           value={result}
           onChange={(e) => setResult(e.target.value)}
-          className="ml-2 border px-2 py-1"
+          className="mt-1 block w-35 border rounded px-2 py-1"
+          disabled={loading}
+          required
         >
+          <option value="">Wybierz wynik</option>
           <option value="pass">Pass</option>
           <option value="fail">Fail</option>
         </select>
       </label>
+
+      {error && <p className="mb-2 text-red-600">{error}</p>}
+
       <button
         type="submit"
-        disabled={sending}
-        className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        disabled={loading || !testName.trim() || !result}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
       >
-        {sending ? "Wysyłanie..." : "Wyślij log"}
+        {loading ? "Dodawanie..." : "Dodaj log"}
       </button>
-      {error && <p className="text-red-600 mt-2">{error}</p>}
     </form>
   );
 }

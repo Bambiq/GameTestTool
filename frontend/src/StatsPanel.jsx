@@ -8,7 +8,12 @@ export default function StatsPanel({ logs }) {
   const failed = logs.filter((log) => log.result === "fail").length;
   const passRate = ((passed / total) * 100).toFixed(1);
   const latest = logs
-    .map((log) => new Date(log.time))
+    .map((log) => new Date(log.time).toLocaleString("pl-PL", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit"}))
     .sort((a, b) => b - a)[0]
     .toLocaleString();
 
