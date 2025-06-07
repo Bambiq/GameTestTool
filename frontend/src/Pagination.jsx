@@ -8,17 +8,17 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
         disabled={currentPage <= 1}
         className="px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
       >
-        Poprzednia
+        Previous
       </button>
       <span>
-        Strona {currentPage} z {totalPages}
+        Page {currentPage} z {totalPages}
       </span>
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
         className="px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
       >
-        Następna
+        Next
       </button>
     </div>
   );

@@ -10,7 +10,7 @@ __pycache__/
 # === FRONTEND (REACT) ===
 frontend/node_modules/
 frontend/.env
-
+node_modules/
 # === ENVIRONMENT / EDITOR ===
 .vscode/
 .idea/

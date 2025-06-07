@@ -1,78 +1,77 @@
 from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from database import SessionLocal, engine
+import models
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Path
-from typing import List
-from models import Log
-from database import SessionLocal, engine
-from database import init_db
+from pydantic import BaseModel
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# CORS (dla komunikacji z frontendem)
+# Middleware dla CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Możesz podać konkretny frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Schemat danych wejściowych
+# Schemat logu (Pydantic)
 class LogCreate(BaseModel):
     test_name: str
     result: str
+    error_category: str = None
+    test_details: str = None
+    game_version: str = None
+    tester: str = None
+    config: str = None
+    bug_status: str = None
+    comment: str = None
     time: datetime
 
-# Dependency: sesja DB
-async def get_db():
-    async with SessionLocal() as session:
-        yield session
+# Dependency do sesji
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-class LogRead(BaseModel):
-    id: int
-    test_name: str
-    result: str
-    time: datetime
-
-    class Config:
-        orm_mode = True
-
-@app.on_event("startup")
-async def on_startup():
-    await init_db()
-
-# Endpoint: dodawanie loga
-@app.post("/logs")
-async def create_log(log: LogCreate, db: AsyncSession = Depends(get_db)):
-    db_log = Log(**log.dict())
-    db.add(db_log)
-    await db.commit()
-    await db.refresh(db_log)
-    return {"message": "Log added", "log": {
-        "id": db_log.id,
-        "test_name": db_log.test_name,
-        "result": db_log.result,
-        "time": db_log.time,
-    }}
-
-# Endpoint: pobieranie wszystkich logów
-@app.get("/logs", response_model=List[LogRead])
-async def read_logs(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Log))
-    logs = result.scalars().all()
+# Endpoint – pobierz wszystkie logi
+@app.get("/logs")
+def get_logs(db: Session = Depends(get_db)):
+    logs = db.query(models.Log).all()
     return logs
 
-@app.delete("/logs/{log_id}")
-async def delete_log(log_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Log).where(Log.id == log_id))
-    log = result.scalar_one_or_none()
-    if not log:
-        raise HTTPException(status_code=404, detail="Log not found")
+# Endpoint – dodaj log
+@app.post("/logs")
+def create_log(log: LogCreate, db: Session = Depends(get_db)):
+    db_log = models.Log(
+        test_name=log.test_name,
+        result=log.result,
+        error_category=log.error_category,
+        test_details=log.test_details,
+        game_version=log.game_version,
+        tester=log.tester,
+        config=log.config,
+        bug_status=log.bug_status,
+        comment=log.comment,
+        time=log.time,
+    )
+    db.add(db_log)
+    db.commit()
+    db.refresh(db_log)
+    return db_log
 
-    await db.delete(log)
-    await db.commit()
-    return {"message": "Log deleted"}
+# Endpoint – usuń log
+@app.delete("/logs/{log_id}")
+def delete_log(log_id: int, db: Session = Depends(get_db)):
+    log = db.query(models.Log).filter(models.Log.id == log_id).first()
+    if not log:
+        raise HTTPException(status_code=404, detail="Log nie znaleziony")
+    db.delete(log)
+    db.commit()
+    return {"message": "Log usunięty"}
