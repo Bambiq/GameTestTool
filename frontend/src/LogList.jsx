@@ -14,14 +14,14 @@ export default function LogList({ logs, onDelete }) {
             <div>
               <p className="font-bold">{log.test_name}</p>
               <p className="text-sm font-semibold text-gray-500">
-              <p><strong>Wynik:</strong> <span className={log.result === "pass" ? "text-green-600" : "text-red-600"}>{log.result}</span></p>
-              {log.error_category && <p><strong>Kategoria błędu:</strong> {log.error_category}</p>}
-              {log.test_details && <p class=" break-normal md:break-all"><strong>Szczegóły testu:</strong> {log.test_details}</p>}
-              {log.game_version && <p><strong>Wersja gry:</strong> {log.game_version}</p>}
+              {log.bug_status && <p><strong>Status:</strong> {log.bug_status}</p>}
+              <p><strong>Result:</strong> <span className={log.result === "Pass" ? "text-green-600" : "text-red-600"}>{log.result}</span></p>
+              {log.error_category && <p><strong>Category:</strong> {log.error_category}</p>}
+              {log.test_details && <p class=" break-normal md:break-all"><strong>Details:</strong> {log.test_details}</p>}
+              {log.game_version && <p><strong>Game version:</strong> {log.game_version}</p>}
               {log.tester && <p><strong>Tester:</strong> {log.tester}</p>}
-              {log.config && <p><strong>Konfiguracja:</strong> {log.config}</p>}
-              {log.bug_status && <p><strong>Status buga:</strong> {log.bug_status}</p>}
-              {log.comment && <p class=" break-normal md:break-all"><strong>Komentarz:</strong> {log.comment}</p>}
+              {log.config && <p><strong>Configuration:</strong> {log.config}</p>}
+              {log.comment && <p class=" break-normal md:break-all"><strong>Comment:</strong> {log.comment}</p>}
               </p>
               <p className="text-xs text-gray-400">
                 Date: {new Date(log.time+ "Z").toLocaleString("pl-PL", {

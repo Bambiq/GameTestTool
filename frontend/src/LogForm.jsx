@@ -20,7 +20,7 @@ export default function LogForm({ onLogSent }) {
     e.preventDefault();
 
     if (!testName.trim() || !result || !bugStatus || !errorCategory) {
-      setError("Proszę wypełnić wymagane pola: nazwa testu i wynik.");
+      setError("Fill out all fields");
       return;
     }
 
@@ -77,6 +77,32 @@ export default function LogForm({ onLogSent }) {
       </label>
 
       <label className="block">
+        Status:
+        <select
+          type="text"
+          value={bugStatus}
+          onChange={(e) => setBugStatus(e.target.value)}
+          className="mt-1 block w-full border rounded px-2 py-1"
+          disabled={loading}
+        > 
+          <option></option>
+          <option value="New">New</option>
+          <option value="Assigned">Assigned</option>
+          <option value="Open">Open</option>
+          <option value="Duplicate">Duplicate</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Deffered">Deffered</option>
+          <option value="Not a Bug">Not a Bug</option>
+          <option value="Fixed">Fixed</option>
+          <option value="Pending Retest">Pending Retest</option>
+          <option value="Retest">Retest</option>
+          <option value="ReOpen">ReOpen</option>
+          <option value="Verified">Verified</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </label>
+
+      <label className="block">
         Result:
         <select
           value={result}
@@ -86,8 +112,9 @@ export default function LogForm({ onLogSent }) {
           disabled={loading}
         >
           <option value=""></option>
-          <option value="pass">Pass</option>
-          <option value="fail">Fail</option>
+          <option value="Pass">Pass</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Fail">Fail</option>
         </select>
       </label>
 
@@ -154,21 +181,6 @@ export default function LogForm({ onLogSent }) {
           className="mt-1 block w-full border rounded px-2 py-1"
           disabled={loading}
         />
-      </label>
-
-      <label className="block">
-        Status:
-        <select
-          type="text"
-          value={bugStatus}
-          onChange={(e) => setBugStatus(e.target.value)}
-          className="mt-1 block w-full border rounded px-2 py-1"
-          disabled={loading}
-        > 
-          <option></option>
-          <option value="reported">Reported</option>
-          <option value="fixed">Fixed</option>
-        </select>
       </label>
 
       <label className="block">

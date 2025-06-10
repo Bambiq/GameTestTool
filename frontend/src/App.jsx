@@ -5,13 +5,14 @@ import LogList from "./LogList";
 import LogControls from "./LogControls";
 import StatsPanel from "./StatsPanel";
 import Pagination from "./Pagination";
+import ExportLogs from "./ExportLogs";
 
 export default function App() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState("all");
-  const [sort, setSort] = useState("newest");
+  const [filter, setFilter] = useState("all");  // filtr po statusie buga
+  const [sort, setSort] = useState("newest");   // sortowanie po dacie
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -32,7 +33,7 @@ export default function App() {
 
   const handleLogSent = () => {
     loadLogs();
-    setCurrentPage(1); // reset strony po dodaniu nowego logu
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -44,45 +45,32 @@ export default function App() {
     }
   };
 
-  // Filtrowanie i sortowanie
-  const filteredLogs = logs
-    .filter((log) => {
-      if (filter === "all") return true;
-      return log.result === filter;
-    })
-    .sort((a, b) => {
-      if (sort === "newest") {
-        return new Date(b.time) - new Date(a.time);
-      } else {
-        return new Date(a.time) - new Date(b.time);
-      }
-    });
+  // Filtrowanie po bug_status
+  const filteredLogs = logs.filter((log) => {
+    if (filter === "all") return true;
+    return log.bug_status === filter;
+  });
 
-  // Paginacja — obliczamy dane do aktualnej strony
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-  const paginatedLogs = filteredLogs.slice(
+  // Sortowanie po dacie
+  const sortedLogs = filteredLogs.sort((a, b) => {
+    if (sort === "newest") {
+      return new Date(b.time) - new Date(a.time);
+    } else {
+      return new Date(a.time) - new Date(b.time);
+    }
+  });
+
+  // Paginacja
+  const totalPages = Math.ceil(sortedLogs.length / itemsPerPage);
+  const paginatedLogs = sortedLogs.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage)
-    ;
+    currentPage * itemsPerPage
+  );
 
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
-
-const handleExport = () => {
-  const dataStr = JSON.stringify(logs, null, 2); // Ładnie sformatowany JSON
-  const blob = new Blob([dataStr], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
-  // Tworzymy link i klikamy w niego
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "logs_export.xlsx"; // Nazwa pliku
-  a.click();
-
-  URL.revokeObjectURL(url); // Sprzątamy
-};
 
   if (loading) return <div>Ładowanie logów...</div>;
   if (error) return <div>Błąd: {error}</div>;
@@ -98,14 +86,9 @@ const handleExport = () => {
           <StatsPanel logs={logs} />
         </div>
       </div>
-        <div className="flex gap-2 mt-4 mb-4">
-          <button
-            onClick={handleExport}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Eksportuj dane
-          </button>
-        </div>
+      <div className="flex gap-2 mt-4 mb-4">
+        <ExportLogs logs={logs} />
+      </div>
       <LogControls
         filter={filter}
         sort={sort}
