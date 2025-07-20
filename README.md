@@ -39,6 +39,9 @@
   <li><strong>API:</strong> REST (Fetch)</li>
 </ul>
 
+![GTL Form](https://github.com/Bambiq/GameTestTool/blob/main/screenshot_1.PNG)
+![GTL List](https://github.com/Bambiq/GameTestTool/blob/main/screenshot_2.PNG)
+
 <h2>📌 Roadmap</h2>
 <ul>
   <li>Keyword and user-based filtering</li>
