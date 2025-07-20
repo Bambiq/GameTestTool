@@ -28,8 +28,8 @@
 <ul>
   <li>Add new test logs</li>
   <li>View and delete existing logs</li>
-  <li>Filter logs by result (pass/fail)</li>
-  <li>Sort logs by date (newest/oldest)</li>
+  <li>Filter logs by result</li>
+  <li>Sort logs by date</li>
 </ul>
 
 <h2>🛠️ Tech Stack</h2>
@@ -46,9 +46,6 @@
   <li>Analytics and statistics dashboard</li>
   <li>User authentication and login</li>
 </ul>
-
-<h2>📄 License</h2>
-<p>MIT License – free to use, modify, and share.</p>
 
 </body>
 </html>
